@@ -76,11 +76,19 @@ Run locally:
 
 The prediction helper automatically trains the model if the saved model artifact is absent.
 
-### 20-minute demonstration video
+### Demo Summary
 
-**Unlisted YouTube video:** `TODO — add the final unlisted YouTube link after recording the demo.`
+The prototype demonstration covers the complete GlucoTwin workflow:
 
-The video should demonstrate the working prototype, architecture, data fusion, model approach, validation and safety boundary.
+1. **Patient context:** a synthetic longitudinal Type 2 diabetes profile is created using historical/EHR-style attributes.
+2. **Live signals:** dynamic glucose, glucose trend, heart rate, HRV, activity and sleep observations are introduced.
+3. **Digital Twin state:** historical and dynamic signals are fused into a continuously updated patient representation.
+4. **Prediction:** Logistic Regression provides a baseline and Random Forest provides the nonlinear comparison for predicting a high-glucose event in the next 2 hours.
+5. **Risk output:** the system converts the predicted probability into LOW / MODERATE / HIGH risk for clinician review.
+6. **Dashboard:** the Streamlit interface presents the patient's current glucose, trajectory, historical profile, dynamic signals and predicted risk together.
+7. **Safety:** the prototype remains a decision-support proof of concept; it does not diagnose, prescribe medication or autonomously intervene.
+
+The complete demonstration flow can be reproduced locally using the commands above and the source code in this repository.
 
 ## 7. Architecture
 
@@ -141,10 +149,6 @@ Before any real-world deployment, the system would require de-identified longitu
 - [x] Architecture diagram in PDF/PPT
 - [x] Presentation in PDF/PPT
 - [x] Repository is public
-
-### Important final step
-
-After recording the demo, replace the `TODO` YouTube placeholder above with the unlisted YouTube URL. Do not put the video file itself in this repository unless the challenge instructions change.
 
 ## Disclaimer
 
