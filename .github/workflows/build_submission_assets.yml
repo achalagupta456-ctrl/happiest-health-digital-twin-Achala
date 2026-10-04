@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/build_submission_assets.yml"
+      - "README.md"
   workflow_dispatch:
 
 permissions:
