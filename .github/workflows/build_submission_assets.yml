@@ -1,0 +1,85 @@
+name: Build submission assets
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build_submission_assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-assets:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install document libraries
+        run: pip install python-pptx reportlab
+      - name: Generate architecture and presentation files
+        run: |
+          mkdir -p submission
+          python - <<'PY'
+          from pptx import Presentation
+          from pptx.util import Inches, Pt
+          from pptx.enum.shapes import MSO_SHAPE
+          from pptx.enum.text import PP_ALIGN
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
+          from reportlab.lib.pagesizes import A4, landscape
+          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.enums import TA_CENTER
+
+          title="GlucoTwin — A Digital Twin for Proactive Glucose-Spike Risk Management"
+          slides=[
+          ("Healthcare Problem",["Diabetes monitoring is often retrospective.","GlucoTwin combines historical patient context with current physiological and behavioral signals.","Target outcome: probability of a high-glucose event in the next 2 hours."]),
+          ("Healthcare Use Case",["Type 2 diabetes risk management.","Historical: age, BMI, HbA1c, diabetes duration, BP, family history, adherence and baseline glucose.","Dynamic: glucose, slope, trajectory, heart rate, HRV, activity and sleep.","Output: 2-hour probability + LOW / MODERATE / HIGH tier for clinician review."]),
+          ("What Makes It a Digital Twin?",["Static patient profile + dynamic observations + feature fusion + repeated state updates + time-bound prediction.","The patient's represented state can change as new observations arrive."]),
+          ("Technical Architecture",["Historical/EHR + dynamic stream → feature engineering → digital-twin state vector → ML prediction → risk output → clinician dashboard → human review.","Patient-level splitting reduces leakage across longitudinal observations."]),
+          ("Technical Stack",["Python 3.11+, Pandas, NumPy, scikit-learn, Streamlit, Plotly and Joblib.","Reproducible synthetic data generator and public GitHub codebase."]),
+          ("AI / ML Methodology",["Logistic Regression baseline; Random Forest primary comparison.","Temporal glucose statistics plus activity, HR, HRV and static profile features.","Metrics: ROC-AUC, PR-AUC, precision, recall and F1.","Synthetic-data results are development evidence, not clinical validation."]),
+          ("Live Prototype",["Run: streamlit run app.py","Dashboard shows 2-hour risk, current glucose, HbA1c, trajectory, historical profile and dynamic signals.","Human review remains mandatory."]),
+          ("Outcomes & Evidence",["End-to-end PoC: generation → feature fusion → validation → model selection → prediction → dashboard.","Static and dynamic data are fused into a patient-specific state.","Risk is localized to the next 2 hours.","Next step: validate on de-identified real longitudinal data."]),
+          ("Safety & Responsible Deployment",["No diagnosis, prescribing or autonomous treatment.","Before deployment: external validation, calibration, subgroup analysis, prospective evaluation, privacy/security controls and clinical governance."]),
+          ("Scale-Up Path",["Connect validated feeds → calibrate thresholds → personalize baselines → monitor drift/fairness/calibration → prospective outcome evaluation."]),
+          ]
+          def tb(slide,text,x,y,w,h,size=18,bold=False):
+              box=slide.shapes.add_textbox(Inches(x),Inches(y),Inches(w),Inches(h))
+              tf=box.text_frame; tf.word_wrap=True; tf.clear()
+              for i,line in enumerate(text):
+                  p=tf.paragraphs[0] if i==0 else tf.add_paragraph(); p.text=("• "+line); p.font.size=Pt(size); p.font.bold=bold; p.space_after=Pt(8)
+          def header(slide,t):
+              b=slide.shapes.add_textbox(Inches(.6),Inches(.35),Inches(12),Inches(.65)); p=b.text_frame.paragraphs[0]; p.text=t; p.font.size=Pt(27); p.font.bold=True
+          prs=Presentation(); prs.slide_width=Inches(13.333); prs.slide_height=Inches(7.5)
+          s=prs.slides.add_slide(prs.slide_layouts[6]); header(s,title); tb(s,["Happiest Health Digital Twin Challenge 2026","Achala Gupta | VGSoM, IIT Kharagpur","Working proof-of-concept: historical + dynamic signals → patient state → 2-hour risk"],.9,2,11.5,3.5,22)
+          for t,items in slides:
+              s=prs.slides.add_slide(prs.slide_layouts[6]); header(s,t); tb(s,items,.8,1.5,11.8,5.4,18)
+          s=prs.slides.add_slide(prs.slide_layouts[6]); header(s,"Closing"); tb(s,["Historical context + dynamic signals","→ patient-specific digital state","→ 2-hour risk prediction","→ clinician review","GlucoTwin turns fragmented health signals into a continuously updated risk state."],1.0,1.8,11.2,4,22)
+          prs.save("submission/GlucoTwin_Presentation.pptx")
+
+          ar=Presentation(); ar.slide_width=Inches(13.333); ar.slide_height=Inches(7.5)
+          s=ar.slides.add_slide(ar.slide_layouts[6]); header(s,title+" — Architecture")
+          labels=["Historical / EHR","Dynamic stream","Feature fusion","AI / ML","2-hour risk","Clinician dashboard","Human-in-the-loop","Validation & monitoring"]
+          coords=[(.6,1.5),(4.7,1.5),(.6,3.3),(4.7,3.3),(8.8,3.3),(8.8,1.5),(8.8,5.1),(4.7,5.1)]
+          for lab,(x,y) in zip(labels,coords):
+              sh=s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE,Inches(x),Inches(y),Inches(3.3),Inches(1.2)); sh.text=lab; sh.text_frame.paragraphs[0].alignment=PP_ALIGN.CENTER; sh.text_frame.paragraphs[0].font.size=Pt(16); sh.text_frame.paragraphs[0].font.bold=True
+          ar.save("submission/GlucoTwin_Architecture.pptx")
+
+          styles=getSampleStyleSheet(); h=ParagraphStyle("h",parent=styles["Heading1"],fontSize=22,leading=26); b=ParagraphStyle("b",parent=styles["BodyText"],fontSize=11,leading=16); c=ParagraphStyle("c",parent=styles["BodyText"],fontSize=11,leading=16,alignment=TA_CENTER)
+          doc=SimpleDocTemplate("submission/GlucoTwin_Presentation.pdf",pagesize=A4,leftMargin=42,rightMargin=42,topMargin=40,bottomMargin=40); story=[Paragraph(title,h)]
+          for t,items in slides: story += [Paragraph(t,h)]+[Paragraph("• "+x,b) for x in items]+[PageBreak()]
+          story += [Paragraph("Closing",h),Paragraph("GlucoTwin turns fragmented health signals into a continuously updated risk state for proactive diabetes risk management.",b)]; doc.build(story)
+
+          doc=SimpleDocTemplate("submission/GlucoTwin_Architecture.pdf",pagesize=landscape(A4),leftMargin=40,rightMargin=40,topMargin=35,bottomMargin=35)
+          story=[Paragraph(title+" — Architecture",h),Paragraph("Historical / EHR → Dynamic stream → Feature fusion → Digital Twin state → AI/ML → 2-hour risk → Clinician dashboard → Human review",b),Paragraph("Validation and monitoring: patient-level split; ROC-AUC, PR-AUC, precision, recall and F1; drift and calibration checks.",b),Paragraph("Safety boundary: synthetic data • risk stratification only • no diagnosis/prescribing • clinician review required",c)]; doc.build(story)
+          PY
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add submission/
+          git diff --cached --quiet || git commit -m "Add competition architecture and presentation assets"
+          git push
