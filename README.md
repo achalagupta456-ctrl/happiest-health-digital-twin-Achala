@@ -59,12 +59,12 @@ The pipeline generates synthetic longitudinal patients, creates static EHR profi
 [x] Clinician conceptual dashboard
 [x] Technical documentation
 [x] Open-source license
-[ ] 20-minute demonstration video link
+[ ] 20-minute demonstration video link (record after final model/demo QA)
 [ ] PDF/PPT architecture diagram
 [ ] PDF/PPT presentation
 [ ] Team details / final submission metadata
 
-The challenge requires a public GitHub repository accessible to evaluators. This repository is currently private; change its GitHub visibility to Public before submission.
+The repository is now **Public** and is intended to be directly accessible to the evaluation team. Before final submission, verify that every linked file/video is also accessible without login.
 
 ## Disclaimer
 
