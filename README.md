@@ -1,71 +1,151 @@
-# GlucoTwin — A Digital Twin for Proactive Glucose-Spike Prevention
+# GlucoTwin — A Digital Twin for Proactive Glucose-Spike Risk Management
 
-Happiest Health Digital Twin Challenge 2026 | IIT Kharagpur, VGSoM
+**Happiest Health Digital Twin Challenge 2026**
 
-GlucoTwin is a proof-of-concept healthcare Digital Twin for Type 2 diabetes risk management. It fuses a patient's static/historical health profile with dynamic wearable/CGM-style time-series signals to estimate the probability of a clinically meaningful glucose spike in the next 2 hours.
+## Team details
 
-Synthetic-data research PoC only. It is not a medical device and must not be used for diagnosis or treatment.
+- **Team:** Achala Gupta
+- **Team Leader:** Achala Gupta
+- **College:** Vinod Gupta School of Management (VGSoM), IIT Kharagpur
+- **Incubator:** Not applicable
+- **Project Title:** GlucoTwin — A Digital Twin for Proactive Glucose-Spike Risk Management
 
-## Problem & healthcare use case
+## 1. Problem Statement
 
-Diabetes management is often retrospective. GlucoTwin creates a continuously updated virtual patient state and asks: Given this patient's history and what their body is doing now, how likely is a glucose spike in the next 2 hours?
+Diabetes management is often retrospective: historical measurements are reviewed separately from what is happening to a patient in real time. The challenge is to maintain a continuously updated representation of a patient that combines their historical health profile with current physiological and behavioral signals, and then use that state to anticipate a specific near-term risk.
 
-The prototype targets 2-hour-ahead high-glucose event prediction.
+**GlucoTwin addresses this by predicting the probability of a high-glucose event in the next 2 hours for a patient with Type 2 diabetes.**
 
-## Required data fusion
+## 2. Healthcare Use Case
 
-Static/historical EHR: age, BMI, HbA1c, diabetes duration, blood pressure, family history, medication adherence and baseline glucose.
+The prototype is designed for **proactive Type 2 diabetes risk management**.
 
-Dynamic/real-time: current glucose, glucose slope, heart rate, HRV, steps/activity, sleep duration and recent glucose trajectory.
+It combines:
 
-## Architecture
+- **Static / historical data:** age, BMI, HbA1c, diabetes duration, systolic blood pressure, family history, medication adherence and baseline glucose.
+- **Dynamic / real-time data:** current glucose, glucose slope, recent glucose trajectory, heart rate, HRV, activity/steps and sleep.
 
-Synthetic EHR + wearable/CGM stream -> feature engineering -> Digital Twin state -> ML risk model -> risk explanation -> clinician dashboard.
+The system produces a patient-specific **2-hour risk probability** and a LOW / MODERATE / HIGH risk tier for clinician review.
 
-See docs/architecture.md and docs/architecture.svg.
+> **Safety boundary:** GlucoTwin is a risk-stratification proof-of-concept. It does not diagnose disease, prescribe medication, recommend dosage changes or autonomously intervene.
 
-## Technical stack
+## 3. What Makes It a Digital Twin?
 
-Python 3.11+, Pandas, NumPy, Scikit-learn, Streamlit, Plotly and Joblib. Models: Logistic Regression baseline and Random Forest classifier.
+GlucoTwin is not a one-time prediction from a static dataset. It represents a patient's current state by combining historical context with dynamic observations. As new observations arrive, the state can be recalculated and the near-term risk can change.
 
-## Run locally
+**Historical profile → dynamic observations → feature fusion → current digital-twin state → 2-hour risk → human review**
+
+## 4. Technical Stack
+
+- Python 3.11+
+- Pandas
+- NumPy
+- scikit-learn
+- Streamlit
+- Plotly
+- Joblib
+- GitHub
+
+## 5. AI / ML Model and Framework Details
+
+**Models**
+- Logistic Regression — interpretable baseline with feature scaling and balanced class weights.
+- Random Forest Classifier — nonlinear primary comparison with class balancing.
+
+**Feature engineering**
+- Glucose slope
+- 6-hour glucose mean and standard deviation
+- 3-hour activity/steps aggregation
+- Mean heart rate
+- Mean HRV
+- Static patient profile variables
+
+**Validation**
+- Patient-level GroupShuffleSplit is used so observations from the same synthetic patient do not appear in both training and test partitions.
+- Evaluation metrics: ROC-AUC, PR-AUC, precision, recall and F1.
+- The model with the stronger test ROC-AUC is retained as the prototype model.
+
+## 6. Prototype and Demo
+
+Run locally:
 
     python -m venv .venv
     pip install -r requirements.txt
     python src/train.py
     streamlit run app.py
 
-The application automatically trains the model if it does not exist.
+The prediction helper automatically trains the model if the saved model artifact is absent.
 
-## Repository structure
+### 20-minute demonstration video
 
-app.py — clinician-facing dashboard
-src/data_generator.py — reproducible synthetic EHR + dynamic data
-src/features.py — static/dynamic feature fusion
-src/train.py — model training and evaluation
-src/predict.py — prediction helper
-tests/ — pipeline test
-docs/ — architecture and presentation material
+**Unlisted YouTube video:** `TODO — add the final unlisted YouTube link after recording the demo.`
 
-## Model and evaluation
+The video should demonstrate the working prototype, architecture, data fusion, model approach, validation and safety boundary.
 
-The pipeline generates synthetic longitudinal patients, creates static EHR profiles, generates hourly dynamic observations, creates a 2-hour-ahead event label, uses patient-level splitting to reduce leakage, compares Logistic Regression and Random Forest, and reports ROC-AUC, PR-AUC, precision, recall and F1.
+## 7. Architecture
 
-## Submission checklist
+The architecture follows:
 
-[x] Working Digital Twin PoC
-[x] Static + dynamic data fusion
-[x] Localized healthcare outcome
-[x] Clinician conceptual dashboard
-[x] Technical documentation
-[x] Open-source license
-[ ] 20-minute demonstration video link (record after final model/demo QA)
-[ ] PDF/PPT architecture diagram
-[ ] PDF/PPT presentation
-[ ] Team details / final submission metadata
+**Historical / EHR data + Dynamic wearable/CGM-style stream → Feature engineering → Digital Twin state vector → AI/ML prediction → Risk output → Clinician dashboard → Human review**
 
-The repository is now **Public** and is intended to be directly accessible to the evaluation team. Before final submission, verify that every linked file/video is also accessible without login.
+Files:
+- [Architecture diagram — PDF](submission/GlucoTwin_Architecture.pdf)
+- [Architecture diagram — PPTX](submission/GlucoTwin_Architecture.pptx)
+- [Architecture documentation](docs/architecture.md)
+
+## 8. Presentation
+
+- [Presentation — PDF](submission/GlucoTwin_Presentation.pdf)
+- [Presentation — PPTX](submission/GlucoTwin_Presentation.pptx)
+- [20-minute demo script](docs/20-minute-demo-script.md)
+
+## 9. Open-source License
+
+This repository is released under the **MIT License**. See [LICENSE](LICENSE).
+
+## 10. Repository Structure
+
+    app.py
+    src/
+      data_generator.py
+      features.py
+      train.py
+      predict.py
+    tests/
+    docs/
+    submission/
+      GlucoTwin_Architecture.pdf
+      GlucoTwin_Architecture.pptx
+      GlucoTwin_Presentation.pdf
+      GlucoTwin_Presentation.pptx
+    requirements.txt
+    LICENSE
+
+## 11. Reproducibility and Limitations
+
+All demonstration data are synthetic and generated reproducibly. The prototype does **not** establish clinical validity, calibration, causal relationships or generalizability to real patients.
+
+Before any real-world deployment, the system would require de-identified longitudinal clinical validation, calibration, subgroup/fairness analysis, prospective clinician-in-the-loop evaluation, privacy/security controls, monitoring for data drift and formal clinical governance.
+
+## Submission readiness
+
+- [x] Team details
+- [x] College / incubator information
+- [x] Project title
+- [x] Problem statement
+- [x] Healthcare use case
+- [x] Technical stack
+- [x] AI/ML model and framework details
+- [ ] 20-minute unlisted YouTube demo link — **only remaining manual item**
+- [x] Open-source license details
+- [x] Architecture diagram in PDF/PPT
+- [x] Presentation in PDF/PPT
+- [x] Repository is public
+
+### Important final step
+
+After recording the demo, replace the `TODO` YouTube placeholder above with the unlisted YouTube URL. Do not put the video file itself in this repository unless the challenge instructions change.
 
 ## Disclaimer
 
-This is an educational prototype using synthetic data. Predictions are not clinically validated and should not guide real medical decisions.
+This is an educational proof-of-concept using synthetic data. Predictions are not clinically validated and must not be used to make real medical decisions.
